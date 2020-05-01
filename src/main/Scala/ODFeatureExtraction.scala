@@ -166,15 +166,18 @@ object ODFeatureExtraction {
         .sortBy(_._2)
 
       var average_trans_cost_time_string = ""
+      var total_average_trans_cost_time = 0L
       if (trans_num != 0){
-        average_trans_cost_time.takeRight(trans_num)
-          .foreach(x => average_trans_cost_time_string += x._1 + ":" + x._2.toString + ",")
+//        average_trans_cost_time.takeRight(trans_num)
+//          .foreach(x => average_trans_cost_time_string += x._1 + ":" + x._2.toString + ",")
+        total_average_trans_cost_time = average_trans_cost_time.map(_._2).sum
       }
       else{
-        average_trans_cost_time_string = "None"
+//        average_trans_cost_time_string = "None"
       }
 
-      ((line._1._1, line._1._2), (line._1._3, averageCostTime, trans_num, average_trans_cost_time_string.dropRight(1), num))
+//      ((line._1._1, line._1._2), (line._1._3, averageCostTime, trans_num, average_trans_cost_time_string.dropRight(1), num))
+      ((line._1._1, line._1._2), (line._1._3, averageCostTime, trans_num, total_average_trans_cost_time, num))
     }).cache()
 
     val ODNum = eachValidPath.groupByKey()
@@ -186,7 +189,7 @@ object ODFeatureExtraction {
 
     val k_th_num = ODNum.take(100).last._2
 
-    ODNum.saveAsTextFile(args(0) + "/liutao/RCB/ODNum")
+//    ODNum.saveAsTextFile(args(0) + "/liutao/RCB/ODNum")
 
     val result = eachValidPath.groupByKey().filter(_._2.size > 1).flatMap(line => {
       val data = line._2.toList

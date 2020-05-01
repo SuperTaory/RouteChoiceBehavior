@@ -63,4 +63,39 @@ object GeneralFunctionSets {
     val S = calendar.get(Calendar.SECOND)
     ( H * 60 + M ) * 60 + S
   }
+
+  // 1-7 Sunday = 1
+  def dayOfWeek(t: Long) : Int = {
+    val pattern = "yyyy-MM-dd HH:mm:ss"
+    val dateFormat = new SimpleDateFormat(pattern)
+    dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
+    val timeString = dateFormat.format(t * 1000)
+    val time = dateFormat.parse(timeString)
+    val calendar = Calendar.getInstance()
+    calendar.setTime(time)
+    calendar.get(Calendar.DAY_OF_WEEK)
+  }
+
+  // 1-12
+  def monthOfYear(t : Long) : Int = {
+    val pattern = "yyyy-MM-dd HH:mm:ss"
+    val dateFormat = new SimpleDateFormat(pattern)
+    dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
+    val timeString = dateFormat.format(t * 1000)
+    val time = dateFormat.parse(timeString)
+    val calendar = Calendar.getInstance()
+    calendar.setTime(time)
+    calendar.get(Calendar.MONTH) + 1
+  }
+
+  def quarterOfDay(t: Long) : Int = {
+    val pattern = "yyyy-MM-dd HH:mm:ss"
+    val dateFormat = new SimpleDateFormat(pattern)
+    dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
+    val timeString = dateFormat.format(t * 1000)
+    val time = dateFormat.parse(timeString)
+    val calendar = Calendar.getInstance()
+    calendar.setTime(time)
+    calendar.get(Calendar.HOUR_OF_DAY) * 4 + calendar.get(Calendar.MINUTE) / 15
+  }
 }

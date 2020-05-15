@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat
 import java.util.{Calendar, TimeZone}
 
-object GeneralFunctionSets {
+object CommonFunctions {
   def transTimeToTimestamp(timeString : String) : Long = {
     val pattern = "yyyy-MM-dd HH:mm:ss"
     val dateFormat = new SimpleDateFormat(pattern)

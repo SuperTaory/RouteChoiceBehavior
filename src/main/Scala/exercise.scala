@@ -1,4 +1,4 @@
-import GeneralFunctionSets.{dayOfWeek, monthOfYear, transTimeToString, quarterOfDay, dayOfMonth_long}
+import CommonFunctions.{dayOfWeek, monthOfYear, transTimeToString, quarterOfDay, dayOfMonth_long}
 object exercise {
   def main(args: Array[String]): Unit = {
     val l = 1588521545L

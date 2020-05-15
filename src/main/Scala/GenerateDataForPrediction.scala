@@ -1,5 +1,5 @@
 import org.apache.spark.sql.SparkSession
-import GeneralFunctionSets.{transTimeToTimestamp, dayOfWeek, monthOfYear, quarterOfDay, dayOfMonth_long}
+import CommonFunctions.{transTimeToTimestamp, dayOfWeek, monthOfYear, quarterOfDay, dayOfMonth_long}
 
 object GenerateDataForPrediction {
 

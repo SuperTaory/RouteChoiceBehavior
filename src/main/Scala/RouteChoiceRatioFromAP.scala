@@ -1,5 +1,5 @@
 import org.apache.spark.sql.SparkSession
-import GeneralFunctionSets.{dayOfMonth_long, transTimeToTimestamp}
+import CommonFunctions.{dayOfMonth_long, transTimeToTimestamp}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer

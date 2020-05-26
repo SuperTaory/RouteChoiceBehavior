@@ -10,12 +10,17 @@ object DataForDesPrediction {
     //  case class Samples(o1:Int, d1:Int, o2:Int, d2:Int, o3:Int, d3:Int, o4:Int, d4:Int, o5:Int, d5:Int,
     //                     o6:Int, d6:Int, o7:Int, d7:Int, o8:Int, d8:Int, o9:Int, d9:Int, ox:Int, dx:Int,
     //                     lo:Int, day:Int, quarter:Int, ld:Int)
-    case class Samples(o_lon1: Double, o_lat1: Double, ot1: Int, d_lon1: Double, d_lat1: Double, o_lon2: Double, o_lat2: Double, ot2: Int, d_lon2: Double, d_lat2: Double,
-                       o_lon3: Double, o_lat3: Double, ot3: Int, d_lon3: Double, d_lat3: Double, o_lon4: Double, o_lat4: Double, ot4: Int, d_lon4: Double, d_lat4: Double,
-                       o_lon5: Double, o_lat5: Double, ot5: Int, d_lon5: Double, d_lat5: Double, o_lon6: Double, o_lat6: Double, ot6: Int, d_lon6: Double, d_lat6: Double,
-                       o_lon7: Double, o_lat7: Double, ot7: Int, d_lon7: Double, d_lat7: Double, o_lon8: Double, o_lat8: Double, ot8: Int, d_lon8: Double, d_lat8: Double,
-                       o_lon9: Double, o_lat9: Double, ot9: Int, d_lon9: Double, d_lat9: Double, o_lonx: Double, o_latx: Double, otx: Int, d_lonx: Double, d_latx: Double,
-                       lo_lon: Double, lo_lat: Double, day: Int, quarter: Int, ld_lon: Double, ld_lat: Double)
+    case class Samples(o_lon1: Double, o_lat1: Double, od1: Int, ot1: Int, d_lon1: Double, d_lat1: Double,
+                       o_lon2: Double, o_lat2: Double, od2: Int, ot2: Int, d_lon2: Double, d_lat2: Double,
+                       o_lon3: Double, o_lat3: Double, od3: Int, ot3: Int, d_lon3: Double, d_lat3: Double,
+                       o_lon4: Double, o_lat4: Double, od4: Int, ot4: Int, d_lon4: Double, d_lat4: Double,
+                       o_lon5: Double, o_lat5: Double, od5: Int, ot5: Int, d_lon5: Double, d_lat5: Double,
+                       o_lon6: Double, o_lat6: Double, od6: Int, ot6: Int, d_lon6: Double, d_lat6: Double,
+                       o_lon7: Double, o_lat7: Double, od7: Int, ot7: Int, d_lon7: Double, d_lat7: Double,
+                       o_lon8: Double, o_lat8: Double, od8: Int, ot8: Int, d_lon8: Double, d_lat8: Double,
+                       o_lon9: Double, o_lat9: Double, od9: Int, ot9: Int, d_lon9: Double, d_lat9: Double,
+                       o_lonx: Double, o_latx: Double, odx: Int, otx: Int, d_lonx: Double, d_latx: Double,
+                       lo_lon: Double, lo_lat: Double, lo_day: Int, lo_quarter: Int, ld_lon: Double, ld_lat: Double, prefix_len: Int)
 
     case class GPS(lon: Double, lat: Double)
 
@@ -57,7 +62,7 @@ object DataForDesPrediction {
             (x - lat_min) / (lat_max - lat_min)
         }
 
-        // 将GPS标准化
+        // 将GPS标准化: (x - x.min) / (x.max -x.min)
         val stationGPSMap = sc.broadcast(stationInfo.map(x => (x._2, (normalizedLon(x._3), normalizedLat(x._4)))).collect().toMap)
 
         // 读取AFC数据
@@ -103,28 +108,31 @@ object DataForDesPrediction {
             val trips = line._2
             val windowSize = 10   // k
             var i = 0
-            val prefix = new ListBuffer[List[(Double, Double, Int, Double, Double)]]
-            val temp = new ListBuffer[(Double, Double, Int, Double, Double)]
-            val lastTrip = new ListBuffer[(Double, Double, Int, Int, Double, Double)]
+            val prefix = new ListBuffer[List[(Double, Double, Int, Int, Double, Double)]]
+            val temp = new ListBuffer[(Double, Double, Int, Int, Double, Double)]
+            val lastTrip = new ListBuffer[(Double, Double, Int, Int, Double, Double, Int)]
+            var prefix_len = 0
             while (i < trips.length) {
                 if (trips(i)._2 == A) {
                     if (i < windowSize) {
-                        for (j <- 0.until(windowSize - i)) {
-                            temp.append((0, 0, 0, 0, 0))
-                        }
+                        prefix_len = i
                         for (j <- 0.until(i)) {
-                            temp.append((trips(j)._4._1, trips(j)._4._2, quarterOfDay(trips(j)._1), trips(j)._5._1, trips(j)._5._2))
+                            temp.append((trips(j)._4._1, trips(j)._4._2, dayOfWeek(trips(j)._1), quarterOfDay(trips(j)._1), trips(j)._5._1, trips(j)._5._2))
+                        }
+                        for (j <- 0.until(windowSize - i)) {
+                            temp.append((0, 0, 0, 0, 0, 0))
                         }
                     }
                     else {
+                        prefix_len = windowSize
                         for (j <- (i - windowSize).until(i)) {
-                            temp.append((trips(j)._4._1, trips(j)._4._2, quarterOfDay(trips(j)._1), trips(j)._5._1, trips(j)._5._2))
+                            temp.append((trips(j)._4._1, trips(j)._4._2, dayOfWeek(trips(j)._1), quarterOfDay(trips(j)._1), trips(j)._5._1, trips(j)._5._2))
                         }
                     }
                     val last_trip = trips(i)
                     val day = dayOfWeek(last_trip._1)
                     val quarter = quarterOfDay(last_trip._1)
-                    lastTrip.append((last_trip._4._1, last_trip._4._2, day, quarter, last_trip._5._1, last_trip._5._2))
+                    lastTrip.append((last_trip._4._1, last_trip._4._2, day, quarter, last_trip._5._1, last_trip._5._2, prefix_len))
                     prefix.append(temp.toList)
                     temp.clear()
                 }
@@ -134,7 +142,7 @@ object DataForDesPrediction {
             for (i <- prefix.indices) yield {
                 (prefix(i), lastTrip(i))
             }
-        })
+        }).filter(x => x._2._7 > 0)
 
         //    // 统计GPS最大最小值
         //    val minMax = cutToSamples.flatMap(line => {
@@ -160,22 +168,23 @@ object DataForDesPrediction {
         val samples = cutToSamples.map(line => {
             val pre = line._1
             val lastTrip = line._2
-            Samples(pre.head._1, pre.head._2, pre.head._3, pre.head._4, pre.head._5,
-                pre(1)._1, pre(1)._2, pre(1)._3, pre(1)._4, pre(1)._5,
-                pre(2)._1, pre(2)._2, pre(2)._3, pre(2)._4, pre(2)._5,
-                pre(3)._1, pre(3)._2, pre(3)._3, pre(3)._4, pre(3)._5,
-                pre(4)._1, pre(4)._2, pre(4)._3, pre(4)._4, pre(4)._5,
-                pre(5)._1, pre(5)._2, pre(5)._3, pre(5)._4, pre(5)._5,
-                pre(6)._1, pre(6)._2, pre(6)._3, pre(6)._4, pre(6)._5,
-                pre(7)._1, pre(7)._2, pre(7)._3, pre(7)._4, pre(7)._5,
-                pre(8)._1, pre(8)._2, pre(8)._3, pre(8)._4, pre(8)._5,
-                pre(9)._1, pre(9)._2, pre(9)._3, pre(9)._4, pre(9)._5,
-                lastTrip._1, lastTrip._2, lastTrip._3, lastTrip._4, lastTrip._5, lastTrip._6)
+            Samples(
+                pre.head._1, pre.head._2, pre.head._3, pre.head._4, pre.head._5, pre.head._6,
+                pre(1)._1, pre(1)._2, pre(1)._3, pre(1)._4, pre(1)._5, pre(1)._6,
+                pre(2)._1, pre(2)._2, pre(2)._3, pre(2)._4, pre(2)._5, pre(2)._6,
+                pre(3)._1, pre(3)._2, pre(3)._3, pre(3)._4, pre(3)._5, pre(3)._6,
+                pre(4)._1, pre(4)._2, pre(4)._3, pre(4)._4, pre(4)._5, pre(4)._6,
+                pre(5)._1, pre(5)._2, pre(5)._3, pre(5)._4, pre(5)._5, pre(5)._6,
+                pre(6)._1, pre(6)._2, pre(6)._3, pre(6)._4, pre(6)._5, pre(6)._6,
+                pre(7)._1, pre(7)._2, pre(7)._3, pre(7)._4, pre(7)._5, pre(7)._6,
+                pre(8)._1, pre(8)._2, pre(8)._3, pre(8)._4, pre(8)._5, pre(8)._6,
+                pre(9)._1, pre(9)._2, pre(9)._3, pre(9)._4, pre(9)._5, pre(9)._6,
+                lastTrip._1, lastTrip._2, lastTrip._3, lastTrip._4, lastTrip._5, lastTrip._6, lastTrip._7)
         }).toDF()
 
 //        samples.printSchema()
 
-//        samples.coalesce(10).write.option("header", "true").csv(args(0) + "/liutao/RCB/SamplesForDP/GPS_Normalized")
+        samples.coalesce(1).write.option("header", "true").csv(args(0) + "/liutao/RCB/SamplesForDP/GPS_normalized_1")
 
         println(lon_max)
         println(lon_min)

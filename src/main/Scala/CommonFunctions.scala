@@ -109,4 +109,5 @@ object CommonFunctions {
     s = s * EARTH_RADIUS
     s*1000
   }
+
 }

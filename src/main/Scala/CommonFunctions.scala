@@ -98,4 +98,15 @@ object CommonFunctions {
     calendar.setTime(time)
     calendar.get(Calendar.HOUR_OF_DAY) * 4 + calendar.get(Calendar.MINUTE) / 15
   }
+
+  def getDistance(lng1: Double, lat1: Double, lng2: Double, lat2: Double): Double = {
+    val EARTH_RADIUS = 6378.137
+    val radLat1 = lat1 * Math.PI / 180.0
+    val radLat2 = lat2 * Math.PI / 180.0
+    val a = radLat1 - radLat2
+    val b = lng1 * Math.PI / 180.0 - lng2 * Math.PI / 180.0
+    var s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)))
+    s = s * EARTH_RADIUS
+    s*1000
+  }
 }

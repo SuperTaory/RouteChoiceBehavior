@@ -22,7 +22,7 @@ object DataForDesPrediction {
         import spark.implicits._
 
         // 读取站点信息 : 1,机场东,22.647011,113.8226476,1268036000,268
-        val stationInfo = sc.textFile(args(0) + "/liutao/AllInfo/stationInfo-UTF-8.txt").map(line => {
+        val stationInfo = sc.textFile(args(0) + "/zlt/AllInfo/stationInfo-UTF-8.txt").map(line => {
             val fields = line.split(",")
             val num = fields.head.toInt - 1
             val name = fields(1)
@@ -53,7 +53,7 @@ object DataForDesPrediction {
         val stationGPSMap = sc.broadcast(stationInfo.map(x => (x._2, (x._3, x._4))).collect().toMap)
 
         // 读取AFC数据 (362138504,2019-06-12 21:49:27,罗湖,21,2019-06-12 22:10:20,黄贝岭,22)
-        val inOut = sc.textFile(args(0) + "/Destin/subway-pair/*").map(line => {
+        val inOut = sc.textFile(args(0) + "/Destination/subway-pair/*").map(line => {
             val fields = line.split(',')
             val in = fields(2)
             val out = fields(5)
@@ -80,7 +80,7 @@ object DataForDesPrediction {
         // 读取AFC数据 (667979926,2019-06-04 08:42:22,坪洲,21,2019-06-04 08:55:23,宝安中心,22)
         val morningPeak = Set(7,8,9)
         val eveningPeak = Set(17,18,19)
-        val tripData = sc.textFile(args(0) + "/Destin/subway-pair/*").map(line => {
+        val tripData = sc.textFile(args(0) + "/Destination/subway-pair/*").map(line => {
             val fields = line.split(',')
             val id = fields(0).drop(1)
             val ot = transTimeToTimestamp(fields(1))
@@ -150,9 +150,9 @@ object DataForDesPrediction {
             val lastTrip = line._2
             pre.map(x => x.toString().drop(1).dropRight(1)).mkString(",") + "," + lastTrip.toString().drop(1).dropRight(1)
         })
-        samples.coalesce(1).saveAsTextFile(args(0) + "/liutao/RCB/SamplesForDesPre/Unnormalized_" + args(1))
+        samples.coalesce(1).saveAsTextFile(args(0) + "/zlt/RCB/SamplesForDesPre/Unnormalized_" + args(1))
 
-//      samples.coalesce(1).write.option("header", "true").csv(args(0) + "/liutao/RCB/SamplesForDesPre/prefix_len_" + args(1))
+//      samples.coalesce(1).write.option("header", "true").csv(args(0) + "/zlt/RCB/SamplesForDesPre/prefix_len_" + args(1))
 
         sc.stop()
     }

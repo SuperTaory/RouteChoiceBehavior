@@ -2,6 +2,7 @@ import java.text.SimpleDateFormat
 import java.util.{Calendar, TimeZone}
 
 object CommonFunctions {
+  // 返回时间戳形式，单位：秒
   def transTimeToTimestamp(timeString : String) : Long = {
     val pattern = "yyyy-MM-dd HH:mm:ss"
     val dateFormat = new SimpleDateFormat(pattern)
@@ -97,6 +98,20 @@ object CommonFunctions {
     val calendar = Calendar.getInstance()
     calendar.setTime(time)
     calendar.get(Calendar.HOUR_OF_DAY) * 4 + calendar.get(Calendar.MINUTE) / 15
+  }
+
+  def halfHourOfMonth(t: Long) : Int = {
+    val pattern = "yyyy-MM-dd HH:mm:ss"
+    val dateFormat = new SimpleDateFormat(pattern)
+    dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
+    val timeString = dateFormat.format(t * 1000)
+    val time = dateFormat.parse(timeString)
+    val calendar = Calendar.getInstance()
+    calendar.setTime(time)
+    val days = calendar.get(Calendar.DAY_OF_MONTH)
+    val hours = calendar.get(Calendar.HOUR_OF_DAY)
+    val minutes = calendar.get(Calendar.MINUTE)
+    (days-1) * 48 + hours * 2 + minutes / 30
   }
 
   def getDistance(lng1: Double, lat1: Double, lng2: Double, lat2: Double): Double = {

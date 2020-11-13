@@ -41,6 +41,9 @@ object CommonFunctions {
   }
 
   def hourOfDay(timeString : String) : Int = {
+    /**
+     * return [0-23]
+     */
     val pattern = "yyyy-MM-dd HH:mm:ss"
     val dateFormat = new SimpleDateFormat(pattern)
     dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))

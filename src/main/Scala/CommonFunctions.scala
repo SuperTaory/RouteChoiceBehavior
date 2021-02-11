@@ -53,6 +53,42 @@ object CommonFunctions {
     calendar.get(Calendar.HOUR_OF_DAY)
   }
 
+  def hourOfDay_Long(t : Long) : Int = {
+    /**
+     * return [0-23]
+     */
+    val pattern = "yyyy-MM-dd HH:mm:ss"
+    val dateFormat = new SimpleDateFormat(pattern)
+    dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
+    val timeString = dateFormat.format(t * 1000)
+    val time = dateFormat.parse(timeString)
+    val calendar = Calendar.getInstance()
+    calendar.setTime(time)
+    calendar.get(Calendar.HOUR_OF_DAY)
+  }
+
+  def periodOfDay(t : Long) : Int = {
+    /**
+     * return Int
+     */
+    val pattern = "yyyy-MM-dd HH:mm:ss"
+    val dateFormat = new SimpleDateFormat(pattern)
+    dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
+    val timeString = dateFormat.format(t * 1000)
+    val time = dateFormat.parse(timeString)
+    val calendar = Calendar.getInstance()
+    calendar.setTime(time)
+    val h = calendar.get(Calendar.HOUR_OF_DAY)
+    if (7 <= h & h <= 9)
+      1
+    else if ( 11 <= h & h <= 12)
+      2
+    else if (18 <= h & h <= 21)
+      3
+    else
+      0
+  }
+
   // 获取时间戳对应当天的秒数
   def secondsOfDay(t : Long) : Long = {
     val pattern = "yyyy-MM-dd HH:mm:ss"

@@ -68,9 +68,6 @@ object CommonFunctions {
   }
 
   def periodOfDay(t : Long) : Int = {
-    /**
-     * return Int
-     */
     val pattern = "yyyy-MM-dd HH:mm:ss"
     val dateFormat = new SimpleDateFormat(pattern)
     dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
@@ -79,9 +76,9 @@ object CommonFunctions {
     val calendar = Calendar.getInstance()
     calendar.setTime(time)
     val h = calendar.get(Calendar.HOUR_OF_DAY)
-    if (7 <= h & h <= 9)
+    if (6 <= h & h <= 9)
       1
-    else if ( 11 <= h & h <= 12)
+    else if ( 11 <= h & h <= 13)
       2
     else if (18 <= h & h <= 21)
       3

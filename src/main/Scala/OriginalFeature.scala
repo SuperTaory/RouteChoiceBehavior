@@ -106,14 +106,7 @@ object OriginalFeature {
 
         // 筛选不规律出行
         val irregularTrip = groupByID.map(line => {
-            // 存储目的站点的全天平均流量特征
-            var feature_g_day = Array.emptyFloatArray
-            // 存储固定时段的平均流量特征
-            var feature_g_period = Array.emptyFloatArray
-            // 存储个体固定时段的目的站点分布特征
-            val feature_i_1 = Array.ofDim[Int](166)
-            // 存储个体固定起点的目的站点分布特征
-            val feature_i_2 = Array.ofDim[Int](166)
+
             val pairs = line._2
             val daySets = line._3
             val stationsNum = Array.ofDim[Int](166)
@@ -217,6 +210,14 @@ object OriginalFeature {
                 tripIndex = pairs.length - 1
             }
 
+            // 存储目的站点的全天平均流量特征
+            var feature_g_day = Array.emptyFloatArray
+            // 存储固定时段的平均流量特征
+            var feature_g_period = Array.emptyFloatArray
+            // 存储个体固定时段的目的站点分布特征
+            val feature_i_1 = Array.ofDim[Int](166)
+            // 存储个体固定起点的目的站点分布特征
+            val feature_i_2 = Array.ofDim[Int](166)
 
             if (tripIndex > 0) {
                 // 提取历史出行数据
@@ -258,16 +259,18 @@ object OriginalFeature {
                 val target = trip._4
                 // 起始时间特征[0-11]
                 val st = hourOfDay_Long(trip._1) / 2
+                val holiday = if (dayOfMonth_long(trip._1) >= 7 & dayOfMonth_long(trip._1) <= 9) "1" else "0"
+                val weekday = if (dayOfWeek(trip._1) > 1 & dayOfWeek(trip._1) < 7) "1" else "0"
 
                 trip._2.toString + ":" + feature_g_day.mkString(",") + "#" + feature_g_period.mkString(",") + "#" +
                     feature_i_1.mkString(",") + "#" + feature_i_2.mkString(",") + "#" + stationsNum.mkString(",") +
-                    ":" + target.toString + ":" + st.toString + ":" + tripIndex.toString + ":" + havePattern.toString
+                    ":" + target.toString + ":" + st.toString + ":" + tripIndex.toString + ":" + weekday + ":" + holiday
             }
             else
                 ""
         }).filter(x => x.nonEmpty)
 
-        irregularTrip.repartition(5).saveAsTextFile(args(0) + "zlt/RCB/IrTripFeatures/IrTrip_all_pec")
+        irregularTrip.repartition(5).saveAsTextFile(args(0) + "zlt/RCB-2021/IrTripFeatures")
 
 //        val desDistribution = irregularTrip.map(line => {
 //            val fields = line.split(":")

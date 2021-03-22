@@ -31,9 +31,8 @@ object SH {
         })
 
 //        val groupedData = file.aggregateByKey(new ArrayBuffer[(Long, String, String)]())((u,v) => u+=v, (u1, u2) => u1++u2)
-        val groupedData = file.groupByKey()
 
-        val pairRDD = groupedData.flatMap(row => {
+        val pairRDD = file.groupByKey().flatMap(row => {
             val data = row._2.toArray.sortBy(_._1)
             val pairs = new ArrayBuffer[(String, String, String, String, String, String, String)]()
             var index = 0
@@ -44,11 +43,14 @@ object SH {
                     pairs.append((row._1, transTimeToString(o._1), o._2, o._3, transTimeToString(d._1), d._2, d._3))
                     index += 2
                 }
+                else{
+                    index += 1
+                }
             }
             for (pair <- pairs) yield
                 pair
         })
-        pairRDD.repartition(100).sortBy(x => (x._1, x._2)).saveAsTextFile(args(0) + "SH/SubwayPair")
+        pairRDD.repartition(20).sortBy(x => (x._1, x._2)).saveAsTextFile(args(0) + "SH/SubwayPair")
         sc.stop()
     }
 }

@@ -11,7 +11,7 @@ object EmpiricalEstimation {
         val spark = SparkSession.builder().appName("EmpiricalEstimation").getOrCreate()
         val sc = spark.sparkContext
 
-        val file = sc.textFile(args(0) + "/zlt/RCB/IrTripFeatures/IrTrip_all_pec/merged").map(line => {
+        val file = sc.textFile(args(0) + "/zlt/RCB-2021/IrTripFeatures_SH/part-00000").map(line => {
             val fields = line.split(":")
             val os = fields(0).toInt
             val ds = fields(2).toInt
@@ -33,8 +33,13 @@ object EmpiricalEstimation {
                 (1, 1)
             else
                 (0, 1)
-        }).reduceByKey(_+_).repartition(1).map(x => (x._1, x._2, args(1)))
-        res.saveAsTextFile(args(0) + "/zlt/RCB/EmpiricalEstimation/" + args(1))
+        }).reduceByKey(_+_)
+
+//        val resMap = res.collect().toMap
+//        println("****************")
+//        println(resMap(1).toFloat / (resMap(0) + resMap(1)))
+//        println("****************")
+        res.repartition(1).map(x => (x._1, x._2, args(1))).saveAsTextFile(args(0) + "/zlt/RCB-2021/EmpiricalEstimation_SH/" + args(1))
         sc.stop()
     }
 }

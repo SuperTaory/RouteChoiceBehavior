@@ -7,14 +7,14 @@ object MarkovChain {
         val spark = SparkSession.builder().appName("MarkovChain").getOrCreate()
         val sc = spark.sparkContext
 
-        val file = sc.textFile(args(0) + "/zlt/RCB/IrTripFeatures/IrTrip_all_pec/merged").map(line => {
+        val file = sc.textFile(args(0) + "/zlt/RCB-2021/IrTripFeatures_SH/part-00000").map(line => {
             val fields = line.split(":")
             val ds = fields(2).toInt
             val data = fields(1).split("#")
 
-            val group = data(1).split(",").map(_.toFloat)
+            val group = data(0).split(",").map(_.toFloat)
 
-            val indiv = data(3).split(",").map(_.toFloat)
+            val indiv = data(2).split(",").map(_.toFloat)
 
             if (indiv.sum == 0) {
                 val newStationNum = new ArrayBuffer[(Int, Float)]()
@@ -40,8 +40,13 @@ object MarkovChain {
                 (1, 1)
             else
                 (0, 1)
-        }).reduceByKey(_+_).repartition(1).map(x => (x._1, x._2, args(1)))
-        res.saveAsTextFile(args(0) + "/zlt/RCB/MarkovChain-STT/" + args(1))
+        }).reduceByKey(_+_)
+//        val resMap = res.collect().toMap
+//        println("****************")
+//        println(resMap(1).toFloat / (resMap(0) + resMap(1)))
+//        println("****************")
+
+        res.repartition(1).map(x => (x._1, x._2, args(1))).saveAsTextFile(args(0) + "/zlt/RCB-2021/MarkovChain-ST_SH/" + args(1))
         sc.stop()
     }
 }

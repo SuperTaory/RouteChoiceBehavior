@@ -8,7 +8,7 @@ object RankDistribution {
         val sc = spark.sparkContext
 
         // 读取AFC数据 (362138504,2019-06-12 21:49:27,罗湖,21,2019-06-12 22:10:20,黄贝岭,22)
-        val rankRDD = sc.textFile(args(0) + "/Destination/subway-pair/*").map(line => {
+        val rankRDD = sc.textFile(args(0) + "/SH/SubwayPair/*").map(line => {
             val fields = line.split(',')
             val id = fields(0).drop(1)
             val stations = new ListBuffer[String]
@@ -32,7 +32,7 @@ object RankDistribution {
         val total = res.map(_._2).reduce(_ + _)
         val distribution = res.map(x => (x._1, x._2.toFloat / total))
 
-        distribution.saveAsTextFile(args(0) + "/zlt/RCB/RankDistribution")
+        distribution.saveAsTextFile(args(0) + "/zlt/RCB-2021/RankDistribution_SH")
         sc.stop()
     }
 }

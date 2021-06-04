@@ -9,6 +9,7 @@ object MultiSamples {
     def main(args: Array[String]): Unit = {
         /**
          * 统计群体流量分布特征，全天和分时
+         * 每个个体筛选出多个样本
          */
         val spark = SparkSession.builder().appName("MultiSamples").getOrCreate()
         val sc = spark.sparkContext

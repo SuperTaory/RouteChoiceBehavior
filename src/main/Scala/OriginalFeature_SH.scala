@@ -268,7 +268,7 @@ object OriginalFeature_SH {
                 ""
         }).filter(x => x.nonEmpty)
 
-        irregularTrip.repartition(5).saveAsTextFile(args(0) + "zlt/RCB-2021/IrTripFeatures_SH")
+        irregularTrip.repartition(5).saveAsTextFile(args(0) + "zlt_hdfs/RCB-2021/IrTripFeatures_SH")
 
         //        val desDistribution = irregularTrip.map(line => {
         //            val fields = line.split(":")
@@ -277,7 +277,7 @@ object OriginalFeature_SH {
         //            ((os, des), 1)
         //        }).reduceByKey(_+_).repartition(1).sortBy(x => (x._1._1, x._1._2))
         //
-        //        desDistribution.saveAsTextFile(args(0) + "/zlt/RCB/DesDistribution")
+        //        desDistribution.saveAsTextFile(args(0) + "/zlt_hdfs/RCB/DesDistribution")
         sc.stop()
     }
 

@@ -17,7 +17,7 @@ object OriginalFeature {
 
         // 读取站点信息 : 1,机场东,22.647011,113.8226476,1268036000,268
         // 站点编号0-165
-        val stationInfo = sc.textFile(args(0) + "/zlt/AllInfo/stationInfo-UTF-8.txt").map(line => {
+        val stationInfo = sc.textFile(args(0) + "/zlt_hdfs/AllInfo/stationInfo-UTF-8.txt").map(line => {
             val fields = line.split(",")
             val num = fields.head.toInt - 1
             val name = fields(1)
@@ -28,7 +28,7 @@ object OriginalFeature {
         val stationNumMap = sc.broadcast(stationInfo.collect().toMap)
 
         // 读取AFC数据 (362138504,2019-06-12 21:49:27,罗湖,21,2019-06-12 22:10:20,黄贝岭,22)
-        val odPair = sc.textFile(args(0) + "/Destination/subway-pair/*").map(line => {
+        val odPair = sc.textFile(args(0) + "/SZ/subway-pair/*").map(line => {
             val fields = line.split(',')
             val ot = hourOfDay(fields(1))
             val dt = hourOfDay(fields(4))
@@ -83,7 +83,7 @@ object OriginalFeature {
         // *********************  个体  *********************
 
         // 读取AFC数据 (362138504,2019-06-12 21:49:27,罗湖,21,2019-06-12 22:10:20,黄贝岭,22)
-        val odPairWithID = sc.textFile(args(0) + "/Destination/subway-pair/*").map(line => {
+        val odPairWithID = sc.textFile(args(0) + "/SZ/subway-pair/*").map(line => {
             val fields = line.split(',')
             val id = fields(0).drop(1)
             val ot = transTimeToTimestamp(fields(1))
@@ -270,7 +270,7 @@ object OriginalFeature {
                 ""
         }).filter(x => x.nonEmpty)
 
-        irregularTrip.repartition(5).saveAsTextFile(args(0) + "zlt/RCB-2021/IrTripFeatures")
+        irregularTrip.repartition(5).saveAsTextFile(args(0) + "zlt_hdfs/RCB-2021/IrTripFeatures")
 
 //        val desDistribution = irregularTrip.map(line => {
 //            val fields = line.split(":")
@@ -279,7 +279,7 @@ object OriginalFeature {
 //            ((os, des), 1)
 //        }).reduceByKey(_+_).repartition(1).sortBy(x => (x._1._1, x._1._2))
 //
-//        desDistribution.saveAsTextFile(args(0) + "/zlt/RCB/DesDistribution")
+//        desDistribution.saveAsTextFile(args(0) + "/zlt_hdfs/RCB/DesDistribution")
         sc.stop()
     }
 
